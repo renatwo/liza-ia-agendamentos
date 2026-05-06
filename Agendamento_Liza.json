@@ -1,0 +1,481 @@
+{
+  "name": "Agendamento OPUS Liza",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ /@(g\\.us|broadcast|newsletter)$/.test($json.body.data.key.remoteJid) }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b4e1bb48-39d6-449d-893c-e7a19970bd30",
+      "name": "Filtrar Grupos1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-3120, 272]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.body.data.key.fromMe === true || $json.body.data.key.fromMe === 'true' }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "add07651-216c-44cf-bc9f-3c7447db8dc8",
+      "name": "É do Cliente?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-2896, 272]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://pygethgcnfhkbqjbrrop.supabase.co/functions/v1/n8n-bot-control",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "SUA_SUPABASE_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ action: 'pause', phone: $('Webhook').item.json.body.data.key.remoteJid.replace(/@(s\\.whatsapp\\.net|c\\.us|lid)$/, ''), instance_name: $('Webhook').item.json.body.instance }) }}",
+        "options": { "timeout": 8000 }
+      },
+      "id": "636c5121-5a60-455b-93a6-2842aaf36277",
+      "name": "Pausar Bot1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-2672, 368]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://pygethgcnfhkbqjbrrop.supabase.co/functions/v1/n8n-bot-control",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "x-api-key", "value": "SUA_SUPABASE_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ action: 'check', phone: $('Webhook').item.json.body.data.key.remoteJid.replace(/@(s\\.whatsapp\\.net|c\\.us|lid)$/, ''), instance_name: $('Webhook').item.json.body.instance }) }}",
+        "options": { "timeout": 8000 }
+      },
+      "id": "d1bb0d24-09ad-4be3-9a41-7d67ff4f29e8",
+      "name": "Verificar Bot1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-2448, 176]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 1 },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.bot_active === true }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3601f645-fe82-48e2-b02d-e9583da7da50",
+      "name": "Bot Ativo?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-2224, 176]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "95f69dac-2207-49c7-93a6-a7610be9f612",
+        "options": {}
+      },
+      "id": "afdf3e12-5dc9-4ebd-96d8-af3671c7d389",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-3344, 272]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://pygethgcnfhkbqjbrrop.supabase.co/functions/v1/resolve-barbershop-whatsapp",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{}] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ instance_name: $('Webhook').item.json.body.instance }) }}",
+        "options": { "timeout": 8000 }
+      },
+      "id": "9f6626bf-88fa-4462-8d4d-d0e0a580a4d1",
+      "name": "Resolver Barbearia1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-2672, 176]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $input.first().json.text || $('Webhook').item.json.body.data.message?.conversation || $('Webhook').item.json.body.data.message?.extendedTextMessage?.text || $('Webhook').item.json.body.data.message?.imageMessage?.caption || $('Webhook').item.json.body.data.message?.videoMessage?.caption || $('Webhook').item.json.body.data.message?.documentMessage?.caption || 'mensagem_nao_suportada' }}",
+        "options": {
+          "systemMessage": "=⚠️ PROTOCOLO DE FERRAMENTAS — NUNCA VIOLAR ⚠️\n\nQUANDO CHAMAR CADA FERRAMENTA:\n• TODA mensagem recebida → chamar buscar_cliente (sem exceção)\n• Cliente pede serviços/preços → chamar listar_servicos\n• Após cliente escolher serviço → chamar listar_barbeiros\n• Cliente pede horários ou pede para agendar → chamar consultar_expediente + consultar_horarios (com barber_id UUID)\n• Cliente confirma com \"sim/confirmo\" → chamar criar_agendamento\n• Cliente quer cancelar → cancelar_agendamento (appointment_id='list' primeiro, depois com UUID)\n• Cliente quer reagendar → cancelar_agendamento (list) → consultar_expediente → consultar_horarios → reagendar_agendamento\n\n--------------------------------------------------\n🚨 REGRAS CRÍTICAS — BARBEIROS, SERVIÇOS E HORÁRIOS\n--------------------------------------------------\n\nA cada NOVA mensagem OU mudança de data/serviço, RECALCULE do zero:\n- Lista de barbeiros → SEMPRE chamar listar_barbeiros\n- Lista de serviços → SEMPRE chamar listar_servicos\n- Horários → SEMPRE chamar consultar_horarios\n\nPROIBIDO usar nomes de barbeiros, serviços ou UUIDs:\n- vindos do histórico de mensagens (chat memory)\n- mencionados pelo cliente sem confirmação na tool\n- de conversas anteriores do mesmo cliente\n- de qualquer fonte que NÃO seja o retorno mais recente da tool\n\nSe o cliente disser \"quero com o Carlos\" (ou qualquer nome):\n1. chame listar_barbeiros\n2. verifique se o nome aparece EXATAMENTE no retorno\n3. se NÃO aparecer: \"Não encontrei o Carlos disponível 😅 Os profissionais que temos são: [lista da tool]\"\n4. se aparecer: use o UUID exato retornado pela tool\n\nA memória do chat existe APENAS para:\n- lembrar o nome do cliente\n- lembrar a intenção atual da conversa\n\nA memória NUNCA serve para:\n- nomes de barbeiros\n- nomes/preços de serviços\n- horários disponíveis\n- UUIDs de qualquer entidade\n\n--------------------------------------------------\n🚨 REGRAS CRÍTICAS — HORÁRIOS\n--------------------------------------------------\n\nPROIBIDO:\n- usar horários do histórico\n- usar horários antigos da conversa\n- inventar horários\n- assumir horários disponíveis\n- assumir que a barbearia está aberta\n- responder horários antes da tool\n\nHORÁRIOS SÓ EXISTEM se forem retornados pela tool consultar_horarios.\n\nANTES de mostrar qualquer horário:\n\n1) consultar_expediente\n2) validar se a barbearia está aberta naquela data\n3) consultar_horarios\n4) mostrar SOMENTE horários reais retornados\n\nSe consultar_expediente informar fechado:\n\"Nesse dia estamos fechados 😢 Quer escolher outra data?\"\n\nSe consultar_horarios retornar vazio:\n\"Nenhum horário disponível nessa data 😢 Quer tentar outro dia ou outro profissional?\"\n\nNUNCA pule essas validações.\n\n--------------------------------------------------\nIDENTIDADE DA AGENTE\n--------------------------------------------------\n\nVocê é a *Liza* 😊\n\nLiza é a assistente virtual oficial da *{{ $('Resolver Barbearia1').item.json.barbershop_name }}*\n\nEla ajuda clientes com:\n\n📅 Agendamentos\n🔄 Reagendamentos\n❌ Cancelamentos\n\nNunca diga que é IA. Nunca diga que é robô. Nunca diga que é automação.\n\nSe perguntarem quem está falando:\n\n\"Oi 😊 Eu sou a Liza, assistente virtual da *{{ $('Resolver Barbearia1').item.json.barbershop_name }}* e estou aqui para te ajudar com seus agendamentos 💈✨\"\n\n--------------------------------------------------\nCONTEXTO FIXO\n--------------------------------------------------\n\nDados fixos desta conversa:\n- barbershop_id: {{ $('Resolver Barbearia1').item.json.barbershop_id }}\n- barbershop_name: {{ $('Resolver Barbearia1').item.json.barbershop_name }}\n- client_phone: {{ $('Webhook').item.json.body.data.key.remoteJid.replace(/@(s\\.whatsapp\\.net|c\\.us|lid)$/, '') }}\n- HOJE: {{ $now.setZone('America/Sao_Paulo').toFormat('yyyy-MM-dd') }}\n- AMANHÃ: {{ $now.setZone('America/Sao_Paulo').plus({days:1}).toFormat('yyyy-MM-dd') }}\n\n--------------------------------------------------\nREGRAS GERAIS\n--------------------------------------------------\n- usar apenas *texto* para negrito (UM asterisco)\n- datas para tools = YYYY-MM-DD\n- exibição para o cliente = dd/mm/yyyy\n- horário = HH:MM\n- valores = R$ 00,00\n"
+        }
+      },
+      "id": "9e5db680-a106-4df0-b968-2f2d466e57c1",
+      "name": "AI Agent1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [-592, 176]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook').item.json.body.instance + ':' + $('Webhook').item.json.body.data.key.remoteJid }}",
+        "contextWindowLength": 10
+      },
+      "id": "ec888f71-ae41-415c-8dcd-fe942854b091",
+      "name": "Postgres Chat Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [-1040, 432]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Lista TODOS os serviços com preços e duração.",
+        "method": "POST",
+        "url": "https://pygethgcnfhkbqjbrrop.supabase.co/functions/v1/n8n-list-services",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            { "name": "x-api-key", "value": "SUA_SUPABASE_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ barbershop_id: $('Resolver Barbearia1').item.json.barbershop_id }) }}"
+      },
+      "id": "7e011c17-36e9-4ae6-9f4b-8e51a67b362f",
+      "name": "listar_servicos",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [-896, 496]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Lista TODOS os barbeiros disponíveis.",
+        "method": "POST",
+        "url": "https://pygethgcnfhkbqjbrrop.supabase.co/functions/v1/n8n-list-barbers",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            { "name": "x-api-key", "value": "SUA_SUPABASE_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ barbershop_id: $('Resolver Barbearia1').item.json.barbershop_id }) }}"
+      },
+      "id": "2b9d157a-c526-4540-a233-854b0cd10829",
+      "name": "listar_barbeiros",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [-736, 576]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Retorna os horários disponíveis para agendamento.",
+        "method": "POST",
+        "url": "https://pygethgcnfhkbqjbrrop.supabase.co/functions/v1/n8n-available-slots",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            { "name": "x-api-key", "value": "SUA_SUPABASE_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ barbershop_id: $('Resolver Barbearia1').item.json.barbershop_id, date: '{date}', barber_id: '{barber_id}', barber_name: '{barber_name}' }) }}"
+      },
+      "id": "4eef6971-db01-4030-afb0-f4ba78fd3bb0",
+      "name": "consultar_horarios",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [-640, 752]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Cria o agendamento confirmado.",
+        "method": "POST",
+        "url": "https://pygethgcnfhkbqjbrrop.supabase.co/functions/v1/n8n-create-booking",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            { "name": "x-api-key", "value": "SUA_SUPABASE_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify(Object.assign({ barbershop_id: $('Resolver Barbearia1').item.json.barbershop_id, client_name: '{client_name}', client_phone: '{client_phone}', service_id: '{service_id}', service_name: '{service_name}', date: '{date}', time: '{time}' })) }}"
+      },
+      "id": "5e56a395-eda8-4cf3-92df-beeb91dd0fa4",
+      "name": "criar_agendamento",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [-464, 752]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Busca o cadastro do cliente pelo telefone.",
+        "method": "POST",
+        "url": "https://pygethgcnfhkbqjbrrop.supabase.co/functions/v1/n8n-lookup-client",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            { "name": "x-api-key", "value": "SUA_SUPABASE_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ barbershop_id: $('Resolver Barbearia1').item.json.barbershop_id, client_phone: $('Webhook').item.json.body.data.key.remoteJid.replace(/@(s\\.whatsapp\\.net|c\\.us|lid)$/, '') }) }}"
+      },
+      "id": "310f6d00-03d0-479f-bb35-e91436fb08ba",
+      "name": "buscar_cliente",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [-304, 688]
+    },
+    {
+      "parameters": { "amount": "={{ Math.min(Math.max(Math.floor(($('AI Agent1').item.json.output || '').length / 200), 0.5), 2) }}" },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [0, 0],
+      "id": "f3b53a72-7030-4dc2-abb2-bfb99eee3465",
+      "name": "Wait"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://evo.renatoaqueiroz.com/message/sendText/{{ $('Webhook').item.json.body.instance }}",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "apikey", "value": "SUA_EVOLUTION_API_KEY" }] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ number: $('Webhook').item.json.body.data.key.remoteJid.replace(/@(s\\.whatsapp\\.net|c\\.us|lid)$/, ''), text: $json.output }) }}",
+        "options": { "timeout": 12000 }
+      },
+      "id": "c74ab7d0-71f1-4e5d-8322-11bc5776a80f",
+      "name": "Enviar WhatsApp1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [208, 176]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Cancela ou lista agendamentos.",
+        "method": "POST",
+        "url": "https://pygethgcnfhkbqjbrrop.supabase.co/functions/v1/n8n-cancel-booking",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            { "name": "x-api-key", "value": "SUA_SUPABASE_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ barbershop_id: $('Resolver Barbearia1').item.json.barbershop_id, client_phone: $('Webhook').item.json.body.data.key.remoteJid.replace(/@(s\\.whatsapp\\.net|c\\.us|lid)$/, ''), appointment_id: '{appointment_id}' }) }}"
+      },
+      "id": "52d3bd2c-7181-4a87-a531-63ad006dd450",
+      "name": "cancelar_agendamento",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [-160, 592]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Verifica se a barbearia está aberta agora.",
+        "method": "POST",
+        "url": "https://pygethgcnfhkbqjbrrop.supabase.co/functions/v1/n8n-barbershop-hours",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            { "name": "x-api-key", "value": "SUA_SUPABASE_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ barbershop_id: $('Resolver Barbearia1').item.json.barbershop_id, check: '{check}' }) }}"
+      },
+      "id": "8e7ba9e7-d9c7-428b-a195-417ae26598e6",
+      "name": "consultar_expediente",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [-16, 544]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict", "version": 1 },
+          "conditions": [
+            {
+              "leftValue": "={{ !!$('Webhook').item.json.body.data.message.audioMessage }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "09f6c5d5-6d6e-49b7-9c4f-ab555ba194d5",
+      "name": "É Áudio?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-2000, 160]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://evo.renatoaqueiroz.com/chat/getBase64FromMediaMessage/{{ $('Webhook').item.json.body.instance }}",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "apikey", "value": "SUA_EVOLUTION_API_KEY" }, { "name": "Content-Type", "value": "application/json" }] },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ message: { key: $('Webhook').item.json.body.data.key } }) }}",
+        "options": { "timeout": 25000 }
+      },
+      "id": "77c27192-b09a-4c82-b62a-6cdbdaa095c7",
+      "name": "Baixar Áudio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-1776, 96]
+    },
+    {
+      "parameters": {
+        "jsCode": "const base64Data = $input.first().json.base64.replace(/^data:[^;]+;base64,/, '');\nconst binaryData = Buffer.from(base64Data, 'base64');\nreturn [{ json: {}, binary: { data: { data: binaryData.toString('base64'), mimeType: 'audio/ogg', fileName: 'audio.ogg' } } }];"
+      },
+      "id": "c956e987-c07c-42d6-9e39-8189608c519c",
+      "name": "Converter Base64",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-1552, 96]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/audio/transcriptions",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Authorization", "value": "Bearer SUA_OPENAI_API_KEY" }] },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": { "parameters": [{ "name": "model", "value": "whisper-1" }, { "name": "language", "value": "pt" }, { "parameterType": "formBinaryData", "name": "file", "inputDataFieldName": "data" }] },
+        "options": { "timeout": 25000 }
+      },
+      "id": "03a0b78e-6289-4920-b551-865d2e7e91cd",
+      "name": "Transcrever Áudio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-1328, 96]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Reagenda um agendamento existente.",
+        "method": "POST",
+        "url": "https://pygethgcnfhkbqjbrrop.supabase.co/functions/v1/n8n-reschedule-booking",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            { "name": "x-api-key", "value": "SUA_SUPABASE_API_KEY" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ barbershop_id: $('Resolver Barbearia1').item.json.barbershop_id, client_phone: $('Webhook').item.json.body.data.key.remoteJid.replace(/@(s\\.whatsapp\\.net|c\\.us|lid)$/, ''), original_date: '{original_date}', original_time: '{original_time}', new_date: '{new_date}', new_time: '{new_time}' }) }}"
+      },
+      "id": "4e6516f3-b2f3-4fdc-aa91-67ed52874414",
+      "name": "reagendar_agendamento",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [112, 416]
+    },
+    {
+      "parameters": { "model": { "__rl": true, "value": "gpt-4.1", "mode": "list", "cachedResultName": "gpt-4.1" }, "builtInTools": {}, "options": {} },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [-1200, 336],
+      "id": "ae5a366a-7ed0-4c18-adc9-95b244c2d1ef",
+      "name": "OpenAI Chat Model"
+    }
+  ],
+  "connections": {
+    "Filtrar Grupos1": { "main": [[{ "node": "É do Cliente?1", "type": "main", "index": 0 }]] },
+    "É do Cliente?1": { "main": [[{ "node": "Resolver Barbearia1", "type": "main", "index": 0 }], [{ "node": "Pausar Bot1", "type": "main", "index": 0 }]] },
+    "Verificar Bot1": { "main": [[{ "node": "Bot Ativo?1", "type": "main", "index": 0 }]] },
+    "Bot Ativo?1": { "main": [[{ "node": "É Áudio?", "type": "main", "index": 0 }]] },
+    "É Áudio?": { "main": [[{ "node": "Baixar Áudio", "type": "main", "index": 0 }], [{ "node": "AI Agent1", "type": "main", "index": 0 }]] },
+    "Baixar Áudio": { "main": [[{ "node": "Converter Base64", "type": "main", "index": 0 }]] },
+    "Converter Base64": { "main": [[{ "node": "Transcrever Áudio", "type": "main", "index": 0 }]] },
+    "Transcrever Áudio": { "main": [[{ "node": "AI Agent1", "type": "main", "index": 0 }]] },
+    "Webhook": { "main": [[{ "node": "Filtrar Grupos1", "type": "main", "index": 0 }]] },
+    "Resolver Barbearia1": { "main": [[{ "node": "Verificar Bot1", "type": "main", "index": 0 }]] },
+    "AI Agent1": { "main": [[{ "node": "Wait", "type": "main", "index": 0 }]] },
+    "Postgres Chat Memory": { "ai_memory": [[{ "node": "AI Agent1", "type": "ai_memory", "index": 0 }]] },
+    "listar_servicos": { "ai_tool": [[{ "node": "AI Agent1", "type": "ai_tool", "index": 0 }]] },
+    "listar_barbeiros": { "ai_tool": [[{ "node": "AI Agent1", "type": "ai_tool", "index": 0 }]] },
+    "consultar_horarios": { "ai_tool": [[{ "node": "AI Agent1", "type": "ai_tool", "index": 0 }]] },
+    "criar_agendamento": { "ai_tool": [[{ "node": "AI Agent1", "type": "ai_tool", "index": 0 }]] },
+    "buscar_cliente": { "ai_tool": [[{ "node": "AI Agent1", "type": "ai_tool", "index": 0 }]] },
+    "Wait": { "main": [[{ "node": "Enviar WhatsApp1", "type": "main", "index": 0 }]] },
+    "cancelar_agendamento": { "ai_tool": [[{ "node": "AI Agent1", "type": "ai_tool", "index": 0 }]] },
+    "consultar_expediente": { "ai_tool": [[{ "node": "AI Agent1", "type": "ai_tool", "index": 0 }]] },
+    "reagendar_agendamento": { "ai_tool": [[{ "node": "AI Agent1", "type": "ai_tool", "index": 0 }]] },
+    "OpenAI Chat Model": { "ai_languageModel": [[{ "node": "AI Agent1", "type": "ai_languageModel", "index": 0 }]] }
+  }
+}
